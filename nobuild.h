@@ -1305,6 +1305,7 @@ void exe_build(Cstr exe, Cstr_Array comp_flags, Cstr_Array exe_deps) {
   }
   for (size_t i = 0; i < local_deps.count; i++) {
     for (size_t k = 0; k < feature_count; k++) {
+      INFO("%s", features[k].elems[0]);
       if (strcmp(local_deps.elems[i], features[k].elems[0]) == 0) {
         for (size_t l = 1; l < features[k].count; l++) {
           local_links = cstr_array_append(local_links, features[k].elems[l]);

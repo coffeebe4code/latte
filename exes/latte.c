@@ -1,14 +1,13 @@
+#include <dirent.h>
 #include <errno.h>
+#include <getopt.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef FILE *Fd;
-#include <dirent.h>
-#include <getopt.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
-typedef pid_t Pid;
 
 #define PATH_SEP "/"
 
@@ -66,12 +65,17 @@ typedef struct {
   Cmd *elems;
   size_t count;
 } Cmd_Array;
-
+typedef struct {
+  Cstr *feature;
+  Cstr_Array *array;
+} thread_data_t;
+// statics
+static int skip_tests = 0;
 static struct option flags[] = {
     {"build", required_argument, 0, 'b'}, {"init", no_argument, 0, 'i'},
     {"clean", no_argument, 0, 'c'},       {"exe", required_argument, 0, 'e'},
     {"release", no_argument, 0, 'r'},     {"add", required_argument, 0, 'a'},
-    {"debug", no_argument, 0, 'd'},
+    {"debug", no_argument, 0, 'd'},       {"skip-tests", no_argument, 0, 's'},
 };
 static result_t results = {0, 0};
 static Cstr_Array *features = NULL;
@@ -100,6 +104,7 @@ void release();
 void debug();
 void build(Cstr_Array comp_flags);
 void obj_build(Cstr feature, Cstr_Array comp_flags);
+void obj_build_threaded(Cstr_Array comp_flags);
 void vend_build(Cstr vend, Cstr_Array comp_flags);
 void test_build(Cstr feature, Cstr_Array comp_flags, Cstr_Array feature_links);
 void exe_build(Cstr feature, Cstr_Array comp_flags, Cstr_Array deps);
@@ -469,12 +474,16 @@ int handle_args(int argc, char **argv) {
   char opt_b[256] = {0};
   strcpy(this_prefix, PREFIX);
 
-  while ((opt_char = getopt_long(argc, argv, "ce:ia:b:dr:", flags,
+  while ((opt_char = getopt_long(argc, argv, "ce:ia:b:dsr:", flags,
                                  &option_index)) != -1) {
     found = 1;
     switch ((int)opt_char) {
     case 'c': {
       c = 1;
+      break;
+    }
+    case 's': {
+      skip_tests = 1;
       break;
     }
     case 'b': {
@@ -542,7 +551,9 @@ int handle_args(int argc, char **argv) {
 
       obj_build(all.elems[i], local_comp);
       test_build(all.elems[i], local_comp, links);
-      EXEC_TESTS(all.elems[i]);
+      if (!skip_tests) {
+        EXEC_TESTS(all.elems[i]);
+      }
       links.elems = NULL;
       links.count = 0;
     }
@@ -652,6 +663,31 @@ void package(Cstr prefix) {
         CONCAT(prefix, "include/"));
   }
   INFO("Installed Successfully");
+}
+
+void *obj_build_ptr(void *input) {
+  thread_data_t *ptr = (thread_data_t *)input;
+  obj_build(*ptr->feature, *ptr->array);
+  return NULL;
+}
+
+void obj_build_threaded(Cstr_Array comp_flags) {
+  pthread_t *tid = malloc(sizeof(pthread_t) * feature_count);
+  Cstr_Array links = CSTRS();
+  for (size_t i = 0; i < feature_count; i++) {
+    for (size_t k = 1; k < features[i].count; k++) {
+      links = cstr_array_append(links, features[i].elems[k]);
+    }
+    thread_data_t *data = malloc(sizeof(thread_data_t));
+    data->feature = &features[i].elems[0];
+    data->array = &comp_flags;
+    pthread_create(&tid[i], NULL, obj_build_ptr, (void *)data);
+    links.elems = NULL;
+    links.count = 0;
+  }
+  for (size_t i = 0; i < feature_count; i++) {
+    pthread_join(tid[i], NULL);
+  }
 }
 
 void obj_build(Cstr feature, Cstr_Array comp_flags) {
@@ -817,7 +853,9 @@ void build(Cstr_Array comp_flags) {
     }
     obj_build(features[i].elems[0], comp_flags);
     test_build(features[i].elems[0], comp_flags, links);
-    EXEC_TESTS(features[i].elems[0]);
+    if (!skip_tests) {
+      EXEC_TESTS(features[i].elems[0]);
+    }
     links.elems = NULL;
     links.count = 0;
   }

@@ -4,7 +4,7 @@
 #include "./nobuild.h"
 
 int main(int argc, char **argv) {
-  EXE("latte");
+  EXE("latte", "-lpthread");
   BOOTSTRAP(argc, argv);
   return 0;
 }
