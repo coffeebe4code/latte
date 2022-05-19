@@ -1,0 +1,70 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-linux-gcc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: build
+        run: |
+          set +e
+          gcc -Wall -Werror -Wextra -O3 ./nobuild.c -o ./nobuild
+          sudo ./nobuild --release
+          if [[ $? == 2 ]]; then
+            exit 0
+          fi
+          set -e
+          echo "there was an issue with nobuild"
+          exit 1
+  build-18-04-gcc:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: build
+        run: |
+          set +e
+          gcc -O3 ./nobuild.c -o ./nobuild
+          sudo ./nobuild --release
+          if [[ $? == 2 ]]; then
+            exit 0
+          fi
+          set -e
+          echo "there was an issue with nobuild"
+          exit 1
+  build-linux-clang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: build
+        run: |
+          set +e
+          clang -O3 ./nobuild.c -o ./nobuild
+          sudo ./nobuild --release 
+          if [[ $? == 2 ]]; then
+            exit 0
+          fi
+          set -e
+          echo "there was an issue with nobuild"
+          exit 1
+  build-macos:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: build
+        run: |
+          set +e
+          clang -O3 ./nobuild.c -o ./nobuild
+          sudo ./nobuild --release
+          if [[ $? == 2 ]]; then
+            exit 0
+          fi
+          set -e
+          echo "there was an issue with nobuild"
+          exit 1
