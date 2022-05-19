@@ -4,6 +4,7 @@
 #include "./nobuild.h"
 
 int main(int argc, char **argv) {
+  EXE("latte");
   BOOTSTRAP(argc, argv);
   return 0;
 }

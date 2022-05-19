@@ -1,26 +1,6 @@
-callgrind.*
-
-# nobuild
-nobuild
-nobuild.exe
+# latte
+latte
 target
 deps
 obj
-vend
-
-
-# nobuild
-nobuild
-target
-deps
-obj
-vend
-
-
-# nobuild
-nobuild
-target
-deps
-obj
-vend
 
