@@ -1,7 +1,10 @@
+#include "../include/parse.h"
+#include "../include/utils.h"
 #include <dirent.h>
 #include <errno.h>
 #include <getopt.h>
 #include <pthread.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,22 +52,10 @@
 // typedefs
 typedef FILE *Fd;
 typedef pid_t Pid;
-typedef const char *Cstr;
 typedef struct {
   short failure_total;
   short passed_total;
 } result_t;
-typedef struct {
-  Cstr *elems;
-  size_t count;
-} Cstr_Array;
-typedef struct {
-  Cstr_Array line;
-} Cmd;
-typedef struct {
-  Cmd *elems;
-  size_t count;
-} Cmd_Array;
 typedef struct {
   Cstr *feature;
   Cstr_Array *array;
@@ -147,15 +138,6 @@ void OKAY(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
     type *elem = &array.elems[elem_##index];                                   \
     body;                                                                      \
   }
-
-#define CSTRS()                                                                \
-  { .elems = NULL, .count = 0 }
-
-#define ENDS_WITH(cstr, postfix) cstr_ends_with(cstr, postfix)
-#define NOEXT(path) cstr_no_ext(path)
-#define JOIN(sep, ...) cstr_array_join(sep, cstr_array_make(__VA_ARGS__, NULL))
-#define CONCAT(...) JOIN("", __VA_ARGS__)
-#define PATH(...) JOIN(PATH_SEP, __VA_ARGS__)
 
 #define DEPS(first, ...)                                                       \
   do {                                                                         \
@@ -644,23 +626,6 @@ void test_pid_wait(Pid pid) {
       PANIC("command process was terminated by %d", WTERMSIG(wstatus));
     }
   }
-}
-
-void package(Cstr prefix) {
-  MKDIRS(CONCAT(prefix));
-  size_t len = strlen(prefix);
-  if (prefix[len - 1] != '/') {
-    prefix = CONCAT(prefix, "/");
-  }
-  MKDIRS(CONCAT(prefix, "lib"));
-  MKDIRS(CONCAT(prefix, "include"));
-  for (size_t i = 0; i < libs.count; i++) {
-    CMD("cp", CONCAT("target/lib", libs.elems[i], ".so"),
-        CONCAT(prefix, "lib/"));
-    CMD("cp", CONCAT("include/", libs.elems[i], ".h"),
-        CONCAT(prefix, "include/"));
-  }
-  INFO("Installed Successfully");
 }
 
 void *obj_build_ptr(void *input) {

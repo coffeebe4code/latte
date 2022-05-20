@@ -388,12 +388,14 @@ int getopt_long(int argc, char *const argv[], const char *optstring,
 #define ANSI_COLOR_CYAN "\x1b[36m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 
-// typedefs
-typedef const char *Cstr;
 typedef struct {
   short failure_total;
   short passed_total;
 } result_t;
+
+// typedefs
+#ifndef CROSSOVER_BS
+typedef const char *Cstr;
 typedef struct {
   Cstr *elems;
   size_t count;
@@ -405,6 +407,7 @@ typedef struct {
   Cmd *elems;
   size_t count;
 } Cmd_Array;
+#endif
 
 // statics
 static int test_result_status __attribute__((unused)) = 0;
@@ -1305,7 +1308,6 @@ void exe_build(Cstr exe, Cstr_Array comp_flags, Cstr_Array exe_deps) {
   }
   for (size_t i = 0; i < local_deps.count; i++) {
     for (size_t k = 0; k < feature_count; k++) {
-      INFO("%s", features[k].elems[0]);
       if (strcmp(local_deps.elems[i], features[k].elems[0]) == 0) {
         for (size_t l = 1; l < features[k].count; l++) {
           local_links = cstr_array_append(local_links, features[k].elems[l]);
