@@ -1,10 +1,10 @@
 #define NOBUILD_IMPLEMENTATION
 #define CC "clang"
-#define CFLAGS "-Wall", "-Werror", "-Wextra", "-std=c11"
+#define CFLAGS "-Wall", "-Werror", "-Wextra", "-std=c11", "-lpthread"
 #include "./nobuild.h"
 
 int main(int argc, char **argv) {
-  EXE("latte", "-lpthread");
+  EXE("latte");
   BOOTSTRAP(argc, argv);
   return 0;
 }

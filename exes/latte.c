@@ -470,7 +470,6 @@ int handle_args(int argc, char **argv) {
   int b = 0;
   int r = 0;
   int d = 0;
-  int p = 0;
   char opt_b[256] = {0};
   strcpy(this_prefix, PREFIX);
 
@@ -522,7 +521,6 @@ int handle_args(int argc, char **argv) {
         }
       }
       strcpy(this_prefix, optarg);
-      p = 1;
       break;
     }
     default: {
@@ -550,8 +548,8 @@ int handle_args(int argc, char **argv) {
       }
 
       obj_build(all.elems[i], local_comp);
-      test_build(all.elems[i], local_comp, links);
       if (!skip_tests) {
+        test_build(all.elems[i], local_comp, links);
         EXEC_TESTS(all.elems[i]);
       }
       links.elems = NULL;
@@ -852,8 +850,8 @@ void build(Cstr_Array comp_flags) {
       links = cstr_array_append(links, features[i].elems[k]);
     }
     obj_build(features[i].elems[0], comp_flags);
-    test_build(features[i].elems[0], comp_flags, links);
     if (!skip_tests) {
+      test_build(features[i].elems[0], comp_flags, links);
       EXEC_TESTS(features[i].elems[0]);
     }
     links.elems = NULL;
