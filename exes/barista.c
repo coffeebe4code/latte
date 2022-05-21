@@ -288,7 +288,7 @@ Cstr cstr_no_ext(Cstr path) {
 }
 
 void create_folders() {
-  MKDIRS("target", "latte");
+  MKDIRS("target", "barista");
   MKDIRS("obj");
   for (size_t i = 0; i < feature_count; i++) {
     MKDIRS(CONCAT("obj/", features[i].elems[0]));
@@ -298,11 +298,11 @@ void create_folders() {
 void update_results() {
   for (size_t i = 0; i < feature_count; i++) {
     Fd fd = fd_open_for_read(
-        CONCAT("target/latte/", features[i].elems[0], ".report"), 1);
+        CONCAT("target/barista/", features[i].elems[0], ".report"), 1);
     int number;
     if (fscanf((FILE *)fd, "%d", &number) == 0) {
       PANIC("couldn't read from file %s",
-            CONCAT("target/latte/", features[i].elems[0], ".report"));
+            CONCAT("target/barista/", features[i].elems[0], ".report"));
     }
     results.passed_total += number;
     fclose(fd);
@@ -571,7 +571,7 @@ void initialize() {
   MKDIRS("include");
   Cmd cmd = {.line = cstr_array_make(
                  "/bin/bash", "-c",
-                 "echo -e '\n# latte\nlatte\ntarget\ndeps\nobj\n' >> "
+                 "echo -e '\n# barista\nbarista\ntarget\ndeps\nobj\n' >> "
                  ".gitignore",
                  NULL)};
   cmd_run_sync(cmd);

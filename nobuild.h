@@ -11,7 +11,9 @@
 typedef FILE *Fd;
 
 #ifndef _WIN32
+#ifndef CROSSOVER_BS
 #define _POSIX_C_SOURCE 200809L
+#endif
 #include <dirent.h>
 #include <fcntl.h>
 #include <getopt.h>

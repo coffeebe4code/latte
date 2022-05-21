@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
   FEATURE("utils");
   FEATURE("parse");
   DEPS("parse", "utils");
-  EXE("latte", "parse", "utils");
+  EXE("barista", "parse", "utils");
   BOOTSTRAP(argc, argv);
   return 0;
 }

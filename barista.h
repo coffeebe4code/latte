@@ -123,6 +123,15 @@ void OKAY(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
     }                                                                          \
   } while (0)
 
+#define ASSERT_NEQ(left, right)                                                \
+  do {                                                                         \
+    if (left == right) {                                                       \
+      test_result_status = 1;                                                  \
+      FAILLOG("file: %s => line: %d => assertion: (%zu) == (%zu)", __FILE__,   \
+              __LINE__, left, right);                                          \
+    }                                                                          \
+  } while (0)
+
 #define ASSERT_SIZE_EQ(left, right)                                            \
   do {                                                                         \
     if (left != right) {                                                       \
@@ -161,7 +170,7 @@ void OKAY(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
 
 #define RETURN()                                                               \
   do {                                                                         \
-    write_report(CONCAT("target/latte/", features[0].elems[0], ".report"));    \
+    write_report(CONCAT("target/barista/", features[0].elems[0], ".report"));  \
     for (size_t i = 0; i < free_count; i++) {                                  \
       free(free_array[i]);                                                     \
     }                                                                          \
