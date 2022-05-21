@@ -35,22 +35,8 @@
 #ifndef LD
 #define LD "ld"
 #endif
-#if defined(__GNUC__) || defined(__clang__)
-#define NOBUILD_PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK)                    \
-  __attribute__((format(printf, STRING_INDEX, FIRST_TO_CHECK)))
-#else
-#define NOBUILD_PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK)
-#endif
-
-#define ANSI_COLOR_RED "\x1b[31m"
-#define ANSI_COLOR_GREEN "\x1b[32m"
-#define ANSI_COLOR_BLUE "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN "\x1b[36m"
-#define ANSI_COLOR_RESET "\x1b[0m"
 
 // typedefs
-typedef FILE *Fd;
 typedef pid_t Pid;
 typedef struct {
   short failure_total;
@@ -123,14 +109,6 @@ void path_rename(Cstr old_path, Cstr new_path);
 void path_rm(Cstr path);
 void VLOG(FILE *stream, Cstr tag, Cstr fmt, va_list args);
 void TABLOG(FILE *stream, Cstr tag, Cstr fmt, va_list args);
-void INFO(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
-void WARN(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
-void ERRO(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
-void PANIC(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
-void FAILLOG(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
-void DESCLOG(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
-void RUNLOG(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
-void OKAY(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
 
 // macros
 #define FOREACH_ARRAY(type, elem, array, body)                                 \

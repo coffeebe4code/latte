@@ -46,7 +46,6 @@ Cstr_Array cstr_array_make(Cstr first, ...);
 Cstr cstr_array_join(Cstr sep, Cstr_Array cstrs);
 Fd fd_open_for_write(Cstr path);
 void add_feature(Cstr_Array val);
-Cstr parse_feature_from_path(Cstr path);
 void VLOG(FILE *stream, Cstr tag, Cstr fmt, va_list args);
 void TABLOG(FILE *stream, Cstr tag, Cstr fmt, va_list args);
 void INFO(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
@@ -67,18 +66,6 @@ void OKAY(Cstr fmt, ...) NOBUILD_PRINTF_FORMAT(1, 2);
 
 #define CSTRS()                                                                \
   { .elems = NULL, .count = 0 }
-
-#define RESULTS()                                                              \
-  do {                                                                         \
-    update_results();                                                          \
-    INFO("OKAY: tests passed %d", results.passed_total);                       \
-    INFO("FAIL: tests failed %d", results.failure_total);                      \
-    INFO(ANSI_COLOR_CYAN "TOTAL:" ANSI_COLOR_RESET " tests ran %d",            \
-         results.failure_total + results.passed_total);                        \
-    if (results.failure_total > 0) {                                           \
-      exit(results.failure_total);                                             \
-    }                                                                          \
-  } while (0)
 
 #define FEATURE(...)                                                           \
   do {                                                                         \
@@ -346,20 +333,6 @@ void write_report(Cstr file) {
   fclose(fd);
 }
 
-Cstr parse_feature_from_path(Cstr val) {
-  Cstr noext = NOEXT(val);
-  char *split = strtok((char *)noext, "/");
-  if (strcmp(split, "tests") == 0 || strcmp(split, "include") == 0 ||
-      strcmp(split, "src") == 0) {
-    split = strtok(NULL, "/");
-    return split;
-  }
-  size_t len = strlen(split);
-  char *result = malloc(len * sizeof(char));
-  memcpy(result, split, len);
-  return result;
-}
-
 void VLOG(FILE *stream, Cstr tag, Cstr fmt, va_list args) {
   fprintf(stream, "[%s] ", tag);
   vfprintf(stream, fmt, args);
@@ -373,12 +346,10 @@ void TABLOG(FILE *stream, Cstr tag, Cstr fmt, va_list args) {
 }
 
 void INFO(Cstr fmt __attribute__((unused)), ...) {
-#ifndef NOINFO
   va_list args;
   va_start(args, fmt);
   VLOG(stderr, "INFO", fmt, args);
   va_end(args);
-#endif
 }
 
 void OKAY(Cstr fmt, ...) {
