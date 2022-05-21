@@ -6,6 +6,7 @@ typedef enum {
   OPAREN,
   CPAREN,
   KEYWORD,
+  COMMA,
 } token_e;
 
 void parse(char *buffer, Cstr_Array *features, Cstr_Array *deps,
